@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}{{ quiz.title }}{% endblock %}
+{% block heading %}{{ quiz.title }}{% endblock %}
+{% block content %}
+<div class="timer-bar">
+  <span>❓ {{ questions|length }} questions</span>
+  <span class="timer" id="timer" data-remaining="{{ remaining }}">--:--</span>
+</div>
+
+<form method="post" id="quiz-form">
+  {% csrf_token %}
+  {% for q in questions %}
+  <div class="question-card">
+    <h3><span class="qnum">{{ forloop.counter }}</span> {{ q.text }}</h3>
+    {% for c in q.choices.all %}
+      <label class="option">
+        <input type="radio" name="question_{{ q.pk }}" value="{{ c.pk }}">
+        <span>{{ c.text }}</span>
+      </label>
+    {% endfor %}
+  </div>
+  {% empty %}
+  <div class="card"><div class="empty">This quiz has no questions.</div></div>
+  {% endfor %}
+  <div class="form-actions" style="margin-bottom:30px">
+    <button type="submit" class="btn" id="submit-btn">✔ Submit Quiz</button>
+    <a href="{% url 'quiz_detail' quiz.pk %}" class="btn btn-light">Leave (progress is kept)</a>
+  </div>
+</form>
+
+<script>
+(function () {
+  var timer = document.getElementById('timer');
+  var form = document.getElementById('quiz-form');
+  var deadline = Date.now() + parseInt(timer.dataset.remaining, 10) * 1000;
+  var submitted = false;
+
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function tick() {
+    var left = Math.max(0, Math.round((deadline - Date.now()) / 1000));
+    timer.textContent = pad(Math.floor(left / 60)) + ':' + pad(left % 60);
+    if (left <= 60) { timer.classList.add('danger'); }
+    if (left === 0 && !submitted) { submitted = true; form.submit(); }
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  form.addEventListener('submit', function (e) {
+    if (submitted) { return; }
+    var total = document.querySelectorAll('.question-card').length;
+    var answered = form.querySelectorAll('input[type=radio]:checked').length;
+    if (answered < total && !confirm((total - answered) + ' question(s) are unanswered. Submit anyway?')) {
+      e.preventDefault();
+      return;
+    }
+    submitted = true;
+  });
+})();
+</script>
+{% endblock %}

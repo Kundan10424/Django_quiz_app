@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block heading %}Dashboard{% endblock %}
+{% block content %}
+<div class="stats-grid">
+  <div class="stat-card"><div class="stat-icon">📝</div><div><h3>{{ attempt_count }}</h3><p>Quizzes Taken</p></div></div>
+  <div class="stat-card"><div class="stat-icon">📈</div><div><h3>{% if average is not None %}{{ average }}%{% else %}--{% endif %}</h3><p>Average Score</p></div></div>
+  <div class="stat-card"><div class="stat-icon">🏅</div><div><h3>{% if best is not None %}{{ best }}%{% else %}--{% endif %}</h3><p>Best Score</p></div></div>
+  <div class="stat-card"><div class="stat-icon">✅</div><div><h3>{{ passed_count }}</h3><p>Quizzes Passed</p></div></div>
+</div>
+
+{% if in_progress %}
+<div class="card">
+  <h2>⏳ Continue where you left off</h2>
+  {% for a in in_progress %}
+    <div class="row-between">
+      <span><strong>{{ a.quiz.title }}</strong> <small class="muted">started {{ a.started_at|timesince }} ago</small></span>
+      <a class="btn btn-sm" href="{% url 'attempt_take' a.pk %}">Resume</a>
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="two-col">
+  <div class="card">
+    <div class="card-head"><h2>Recent Attempts</h2><a class="btn btn-light btn-sm" href="{% url 'attempt_history' %}">View all</a></div>
+    {% if recent %}
+    <div class="table-wrap"><table>
+      <thead><tr><th>Quiz</th><th>Score</th><th>Result</th><th></th></tr></thead>
+      <tbody>
+      {% for a in recent %}
+        <tr>
+          <td>{{ a.quiz.title }}</td>
+          <td>{{ a.score }}/{{ a.total }} ({{ a.percentage }}%)</td>
+          <td>{% if a.passed %}<span class="badge badge-green">Passed</span>{% else %}<span class="badge badge-red">Failed</span>{% endif %}</td>
+          <td><a href="{% url 'attempt_result' a.pk %}">Review</a></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    {% else %}
+    <div class="empty"><span class="big">🧠</span>You have not taken any quiz yet. <a href="{% url 'quiz_list' %}">Start one now</a>.</div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>Try a Quiz</h2><a class="btn btn-light btn-sm" href="{% url 'quiz_list' %}">All quizzes</a></div>
+    {% for q in featured %}
+      <a class="mini-quiz" href="{% url 'quiz_detail' q.pk %}">
+        <strong>{{ q.title }}</strong>
+        <small class="muted">{{ q.question_total }} questions · {{ q.time_limit_minutes }} min</small>
+      </a>
+    {% empty %}
+      <div class="empty">No quizzes available yet.{% if user.is_staff %} <a href="{% url 'admin:index' %}">Add some in the admin</a>.{% endif %}</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

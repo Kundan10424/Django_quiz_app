@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Quizzes{% endblock %}
+{% block heading %}Available Quizzes{% endblock %}
+{% block content %}
+<div class="card">
+  <form method="get" class="filters">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search quizzes..." class="form-control">
+    <select name="category" class="form-control">
+      <option value="">All categories</option>
+      {% for c in categories %}<option value="{{ c.pk }}" {% if category_id == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+    </select>
+    <button class="btn btn-light btn-sm" type="submit">Filter</button>
+    {% if q or category_id %}<a href="{% url 'quiz_list' %}" class="btn btn-light btn-sm">Clear</a>{% endif %}
+  </form>
+</div>
+
+{% if page_obj %}
+<div class="quiz-grid">
+  {% for quiz in page_obj %}
+  <div class="quiz-card">
+    <span class="badge badge-blue">{{ quiz.category.name|default:"General" }}</span>
+    <h3>{{ quiz.title }}</h3>
+    <p class="muted">{{ quiz.description|truncatechars:90|default:"No description." }}</p>
+    <div class="chips"><span>❓ {{ quiz.question_total }} questions</span><span>⏱ {{ quiz.time_limit_minutes }} min</span><span>🎯 Pass {{ quiz.pass_percentage }}%</span></div>
+    <a class="btn btn-block" href="{% url 'quiz_detail' quiz.pk %}">View Quiz</a>
+  </div>
+  {% endfor %}
+</div>
+{% include 'partials/_pagination.html' %}
+{% else %}
+<div class="card"><div class="empty"><span class="big">🔍</span>No quizzes found.</div></div>
+{% endif %}
+{% endblock %}

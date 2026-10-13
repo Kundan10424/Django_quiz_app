@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Result{% endblock %}
+{% block heading %}Result: {{ quiz.title }}{% endblock %}
+{% block content %}
+<div class="card result-card">
+  <div class="score-ring" style="--p: {{ attempt.percentage }}"><span>{{ attempt.percentage }}%</span></div>
+  <div>
+    <h2 style="margin-bottom:6px">{% if attempt.passed %}🎉 Congratulations, you passed!{% else %}😕 Not passed this time{% endif %}</h2>
+    <p class="muted">Pass mark: {{ quiz.pass_percentage }}% · Time taken: {{ attempt.duration_display }}</p>
+    <div class="chips" style="margin:14px 0">
+      <span class="chip-green">✔ {{ attempt.score }} correct</span>
+      <span class="chip-red">✘ {{ wrong }} wrong / skipped</span>
+      <span>📋 {{ attempt.total }} total</span>
+    </div>
+    <div class="actions">
+      <form method="post" action="{% url 'quiz_start' quiz.pk %}">{% csrf_token %}<button class="btn" type="submit">🔁 Try Again</button></form>
+      <a class="btn btn-light" href="{% url 'leaderboard' %}?quiz={{ quiz.pk }}">🏆 Leaderboard</a>
+      <a class="btn btn-light" href="{% url 'quiz_list' %}">All Quizzes</a>
+    </div>
+  </div>
+</div>
+
+<h2 style="margin-bottom:14px">Answer Review</h2>
+{% for r in review %}
+<div class="question-card">
+  <h3><span class="qnum {% if r.is_correct %}ok{% else %}bad{% endif %}">{{ forloop.counter }}</span> {{ r.question.text }}</h3>
+  {% for c in r.choices %}
+    <div class="option {% if c.is_correct %}correct{% elif c.pk == r.selected_id %}wrong{% endif %}">
+      <span>{{ c.text }}</span>
+      {% if c.is_correct %}<em>✔ Correct answer</em>{% elif c.pk == r.selected_id %}<em>✘ Your answer</em>{% endif %}
+    </div>
+  {% endfor %}
+  {% if r.selected_id is None %}<p class="muted">You did not answer this question.</p>{% endif %}
+  {% if r.question.explanation %}<p class="explain">💡 {{ r.question.explanation }}</p>{% endif %}
+</div>
+{% endfor %}
+{% endblock %}

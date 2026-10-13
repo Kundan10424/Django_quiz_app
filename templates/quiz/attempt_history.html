@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}My Attempts{% endblock %}
+{% block heading %}My Attempts{% endblock %}
+{% block content %}
+<div class="card">
+  {% if page_obj %}
+  <div class="table-wrap"><table>
+    <thead><tr><th>Quiz</th><th>Date</th><th>Score</th><th>Time</th><th>Result</th><th></th></tr></thead>
+    <tbody>
+    {% for a in page_obj %}
+      <tr>
+        <td><a href="{% url 'quiz_detail' a.quiz.pk %}">{{ a.quiz.title }}</a></td>
+        <td>{{ a.finished_at|date:"d M Y, H:i" }}</td>
+        <td>{{ a.score }}/{{ a.total }} ({{ a.percentage }}%)</td>
+        <td>{{ a.duration_display }}</td>
+        <td>{% if a.passed %}<span class="badge badge-green">Passed</span>{% else %}<span class="badge badge-red">Failed</span>{% endif %}</td>
+        <td><a class="btn btn-light btn-sm" href="{% url 'attempt_result' a.pk %}">Review</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% include 'partials/_pagination.html' %}
+  {% else %}
+  <div class="empty"><span class="big">🕘</span>No completed attempts yet. <a href="{% url 'quiz_list' %}">Take a quiz</a>.</div>
+  {% endif %}
+</div>
+{% endblock %}

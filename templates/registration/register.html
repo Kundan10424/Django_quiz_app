@@ -1,0 +1,12 @@
+{% extends 'base_auth.html' %}
+{% block title %}Register{% endblock %}
+{% block content %}
+<h1>Create Account</h1>
+<p class="sub">Join and start testing your knowledge</p>
+<form method="post" novalidate>
+  {% csrf_token %}
+  {% include 'partials/_form_fields.html' %}
+  <button type="submit" class="btn btn-block">Register</button>
+</form>
+<p class="switch">Already have an account? <a href="{% url 'login' %}">Login</a></p>
+{% endblock %}

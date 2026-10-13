@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}{{ quiz.title }}{% endblock %}
+{% block heading %}{{ quiz.title }}{% endblock %}
+{% block content %}
+<div class="two-col">
+  <div class="card">
+    <span class="badge badge-blue">{{ quiz.category.name|default:"General" }}</span>
+    <p style="margin:14px 0">{{ quiz.description|default:"Good luck!" }}</p>
+    <div class="detail-grid" style="margin-bottom:20px">
+      <div class="detail-item"><small>Questions</small><strong>{{ quiz.question_total }}</strong></div>
+      <div class="detail-item"><small>Time limit</small><strong>{{ quiz.time_limit_minutes }} minutes</strong></div>
+      <div class="detail-item"><small>Pass mark</small><strong>{{ quiz.pass_percentage }}%</strong></div>
+    </div>
+    <ul class="rules">
+      <li>Choose one answer for each question.</li>
+      <li>The quiz is submitted automatically when the timer ends.</li>
+      <li>You can retake the quiz as many times as you like.</li>
+    </ul>
+    <form method="post" action="{% url 'quiz_start' quiz.pk %}">
+      {% csrf_token %}
+      <button type="submit" class="btn">{% if in_progress %}▶ Resume Quiz{% else %}▶ Start Quiz{% endif %}</button>
+      <a href="{% url 'quiz_list' %}" class="btn btn-light">Back</a>
+    </form>
+  </div>
+  <div class="card">
+    <h2>Your previous attempts</h2>
+    {% for a in my_attempts %}
+      <div class="row-between">
+        <span>{{ a.finished_at|date:"d M Y, H:i" }}</span>
+        <span>{{ a.score }}/{{ a.total }}
+          {% if a.passed %}<span class="badge badge-green">Passed</span>{% else %}<span class="badge badge-red">Failed</span>{% endif %}
+          <a href="{% url 'attempt_result' a.pk %}">Review</a></span>
+      </div>
+    {% empty %}
+      <div class="empty">No attempts yet.</div>
+    {% endfor %}
+    <p style="margin-top:14px"><a href="{% url 'leaderboard' %}?quiz={{ quiz.pk }}">🏆 View leaderboard</a></p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Dashboard{% endblock %} | QuizMaster</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand"><span class="logo">🧠</span> QuizMaster</div>
+    <nav class="nav">
+      <a href="{% url 'dashboard' %}" class="{% if request.path == '/' %}active{% endif %}">📊 Dashboard</a>
+      <a href="{% url 'quiz_list' %}" class="{% if '/quizzes/' in request.path %}active{% endif %}">📝 Quizzes</a>
+      <a href="{% url 'attempt_history' %}" class="{% if '/attempts/' in request.path %}active{% endif %}">🕘 My Attempts</a>
+      <a href="{% url 'leaderboard' %}" class="{% if '/leaderboard/' in request.path %}active{% endif %}">🏆 Leaderboard</a>
+      {% if user.is_staff %}<a href="{% url 'admin:index' %}">⚙️ Manage Quizzes</a>{% endif %}
+    </nav>
+    <form method="post" action="{% url 'logout' %}">{% csrf_token %}
+      <button type="submit" class="logout-btn">🚪 Logout</button>
+    </form>
+  </aside>
+  <main class="content">
+    <header class="topbar">
+      <h1>{% block heading %}{% endblock %}</h1>
+      <span class="user-chip">👤 {{ user.username }}</span>
+    </header>
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+</body>
+</html>
